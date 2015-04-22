@@ -1,0 +1,9 @@
+{
+  "name": "CounterApp",
+  "version": "0.1.0",
+  "description": "A small counter app for testing a incrementing data type",
+  "main": "index.html",
+  "rdt_list": [
+    "incRDT", "decRDT"
+  ]
+}

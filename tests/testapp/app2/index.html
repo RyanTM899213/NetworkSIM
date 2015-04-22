@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+
+	<!-- compatability with chrome -->
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="auth.js"></script>
+    <script src="search.js"></script>
+    <script src = "https://www.youtube.com/iframe_api"></script>
+    <script type="text/javascript" src="http://swfobject.googlecode.com/svn/trunk/swfobject/swfobject.js"></script>
+    <script src="https://apis.google.com/js/client.js?onload=onClientLoad" type="text/javascript"></script>
+    <script src = '../ApplicationRequirements.js' type='text/javascript'></script>
+	<script type = "text/javascript">
+    
+    function search_videos(){
+   	var text = document.getElementById("video").value; 
+   	
+   	// 2. This code loads the IFrame Player API code asynchronously.
+   	document.getElementById("result_section");
+   	
+      var tag = document.createElement('script');
+		tag.type = "text/javascript"; 
+      tag.src =  "https://gdata.youtube.com/feeds/api/videos?q=" + text + 
+       "&v=2&alt=json-in-script&callback=showMyVideos2&max-results=9&format=5"; 
+   	 var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+	  
+    }
+     function loadVideo(playerUrl, autoplay) {
+  			 swfobject.embedSWF(
+      	playerUrl + '&rel=1&border=0&fs=1&autoplay=' + 
+      	(autoplay?1:0), 'player', '290', '250', '9.0.0', false, 
+      	false, {allowfullscreen: 'true'});
+	  }
+
+	function showMyVideos2(data) {
+		
+		 var feed = data.feed;
+		
+  		var entries = feed.entry || [];
+  		var html = ['<ul class="videos">'];
+  		for (var i = 0; i < entries.length; i++) {
+    		var entry = entries[i];
+    		var title = entry.title.$t.substr(0, 20);
+    		var thumbnailUrl = entries[i].media$group.media$thumbnail[0].url;
+   		 var playerUrl = entries[i].media$group.media$content[0].url;
+   		 html.push('<li onclick="loadVideo(\'', playerUrl, '\', true)">',
+              '<span class="titlec">', title, '...</span><br /><img src="', 
+              thumbnailUrl, '" width="130" height="97"/>', '</span></li>');
+  		}
+  		html.push('</ul><br style="clear: left;"/>');
+  		document.getElementById('result_section').innerHTML = html.join('');
+  		if (entries.length > 0) {
+   	 loadVideo(entries[0].media$group.media$content[0].url, false);
+ 		 }
+	}
+	
+	function showMyVideos1(data) {
+		var section = document.getElementById('search-container').innerHTML = "";
+		
+  		var entries = data.items || [];
+  		var html = ['<ul class="videos">'];
+  		for (var i = 0; i < data.items.length; i++) {
+    		var entry = data.items[i].id.videoId;
+    		var frame = document.createElement('iframe');
+    		frame.src = "http://www.youtube.com/embed/" + entry;
+    		var section = document.getElementById('search-container');
+    		section.appendChild(frame);
+    		
+		}
+	}
+	
+	var inc_local_count = 0;
+		
+		function incrCounter(){
+			var local_counter = document.getElementById('inc_local_count').innerHTML = inc_local_count + 1;
+			inc_local_count++;
+			manipulateRDT('Counter', 'inc', newIncVal );
+			
+		}
+	
+		function newIncVal(new_val){
+			document.getElementById('inc_global_count').innerHTML = new_val;
+		}
+    
+    </script>
+    <link rel="stylesheet" href="main.css" type="text/css" />
+    
+
+<meta http-equiv="Content-Language" content="en-ca" />
+<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title> YouTube Search</title>
+
+</head>
+<body>
+<div>
+<h2> Video Searcher:  Search a video by keyword </h2>
+<div id="videos">
+<h3> Using DOM implemented Google API</h3>
+<input id = "video" value = "hello" type = "text"/> 
+<button class = 'myButton'  id="search-button"  onclick="search_videos()">Search</button> 
+<br><br>
+<div id="playerContainer" style="width: 20em; height: 450px;">
+	
+    <object id="player"></object>
+	<br>
+	<div style = "text-align:center">
+		<button class = 'myButton'   onclick="incrCounter()">Like</button> 
+		<h4> My Likes   <span id = 'inc_local_count'></span> </h4>
+		<h4> Others  <span id = 'inc_global_count'></span>		</h4>
+	</div>
+	
+	<br>
+	
+</div>
+<br>
+<hr>
+<div id = "result_section"> </div>
+
+</div>
+</body>
+</html>

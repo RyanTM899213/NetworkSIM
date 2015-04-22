@@ -1,0 +1,32 @@
+
+svg{
+	background: ##F0F1F2;
+	width: 700px;
+  	height: 700px;
+}
+
+#simulation-log{
+	background-color: #F0F1F2;
+	height: 150px;
+	width: 600px;
+	border-radius:10px;
+}
+
+#device-log{
+	background-color: #F0F1F2;
+	height: 150px;
+	width: 600px;
+	border-radius:10px;
+}
+
+#log-dates{
+	background-color: #F0F1F2;
+	height:700px;
+	width: 250px;
+	padding: 10px;
+	border-radius:10px;
+}
+
+.sim-log-cell{
+	display:inline-block;
+}

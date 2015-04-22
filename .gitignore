@@ -1,0 +1,4 @@
+node_modules/
+*.log
+/logfile.txt
+/._logfile.txt3128121331093681240.tmp

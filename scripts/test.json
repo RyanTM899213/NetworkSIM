@@ -1,0 +1,11 @@
+{ "name": "firstTest",
+ "version": "0.1.0",
+ "description": "The first automatic test script for our framework",
+ "parameters": { 
+		"rdts":[ {"name": "Counter", "method" : "inc"} ,
+					{"name" : "MyCounter", "method" : "dec"} 
+				],
+		"device_mobility":"high", 
+		"operations":10 
+ 		} 
+}

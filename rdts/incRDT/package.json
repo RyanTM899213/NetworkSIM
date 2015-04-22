@@ -1,0 +1,6 @@
+{
+  "name": "incRDT",
+  "version": "0.1.0",
+  "description": "A replicated integer counter data type",
+  "main": "rdtInterface.js"
+}

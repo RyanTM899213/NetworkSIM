@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta content="IE=edge" http-equiv="X-UA-Compatible">
+		<meta content="width=device-width, initial-scale=1" name="viewport">
+		<meta content="" name="CS4770 Team 2 Project">	
+		<link href="../ajax/favicon.ico" rel="icon">
+		<title>CS4770 Team 2 Project</title>
+		
+		<!--  Hogan.js -->
+		<script src="../js/hogan-3.0.1.js"></script>
+		
+		<!-- Socket.IO -->
+		<script src="/js/socket.io.js"></script>
+		
+		<!--  Utilities -->
+		<script src = '../js/Utilities.js' type='text/javascript'></script>
+		<script src = '../js/PartitionListUtilities.js' type='text/javascript'></script>
+		
+		<!--  Models -->
+		<script src='../logic/LocalStorageManager.js' type='text/javascript'></script>	
+		<script src='../logic/ServerSync.js' type='text/javascript'></script>
+		<script src='../logic/ClientDeviceManager.js' type='text/javascript'></script>
+		<script src='../logic/ClientAppsManager.js' type='text/javascript'></script>
+		<script src = '../logic/ClientNetworkManager.js' type='text/javascript'></script>
+		<script src = '../logic/ClientPartitionManager.js' type='text/javascript'></script>
+		<script src = '../logic/ClientTokenManager.js' type='text/javascript'></script>
+		<script src='../logic/EventQueue.js' type='text/javascript'></script>
+		<script src = '../logic/ClientSimulationManager.js' type='text/javascript'></script>
+		<script src = '../logic/LocalDeviceManager.js' type='text/javascript'></script>
+		<script src = '../logic/LocalSimulationManager.js' type='text/javascript'></script>
+		<script src = '../logic/FileUpload.js' type='text/javascript'></script>
+		
+		<!--  GUI -->
+		<script src='../gui/interact-1.2.2.js' type='text/javascript'></script>
+		<script src='../gui/Shapes.js' type='text/javascript'></script>
+		
+		<!--  HTML Templates -->
+		<script src = '../template/AccountTemplate.js' type='text/javascript'></script>
+		<script src = '../template/DeviceListTemplate.js' type='text/javascript'></script>
+		<script src = '../template/NetworkListTemplate.js' type='text/javascript'></script>
+		<script src = '../template/SimulationListTemplate.js' type='text/javascript'></script>
+		<script src = '../template/SimulationRegistrationTemplate.js' type = 'text/javascript'></script>
+		<script src = '../template/ViewLogsTemplate.js' type='text/javascript'></script>
+		<script src = '../template/SimulationSideBarTemplate.js' type='text/javascript'></script>
+		<script src = '../template/UploadFileTemplate.js' type='text/javascript'></script>
+		<script src = '../template/RDTsListTemplate.js' type='text/javascript'></script>
+		<script src = '../template/AdminAppsListTemplate.js' type='text/javascript'></script>
+		<script src = '../template/DeviceAppsListTemplate.js' type='text/javascript'></script>
+		<script src = '../template/NetworkTopologyTemplate.js' type='text/javascript'></script>
+		<script src = '../template/TestListTemplate.js' type='text/javascript'></script>
+		<script src = '../template/EventLogViewTemplate.js' type='text/javascript'></script>
+		
+		<!--  Views -->
+		<script src = '../view/SimulationCreationView.js' type='text/javascript'></script>
+		<script src = '../view/ViewManager.js' type='text/javascript'></script>
+		<script src = '../view/DeviceViewManager.js' type='text/javascript'></script>
+		<script src = '../view/ViewUtilities.js' type='text/javascript'></script>
+		
+		
+	</head>
+	
+
+<script type = 'create_network_template' id = "template1">
+
+<div class = 'container'>
+<h1 class='flip-up-text'>Create a Network</h1>
+<table class='center-table'>
+	<tr>
+		<td>
+			Network Name:
+			<input type = 'text' class='text-input' id = 'networkname' name = 'networkname' placeholder = 'Name' />
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<br> <div class = 'btn-2' onclick = "Device_makeNetwork('networkname')"> Create Network</div>
+		</td>
+	</tr>
+</table>
+
+
+</div>
+</script>
+<script type = 'partition-template' id = 'template2'>
+<table class='center-table'>
+	<tr>  
+		<td> <input type = 'text' class = 'partition partition-text-input text-input'  placeholder = 'Enter Partition Name' /> 
+		<div class = 'remover btn-2' onclick = "deletefromConfigTable(this.parentNode.parentNode, 'Partition', 'config-map')" > Delete</div> </td> 
+			<td>  
+				<table class='center-table'>
+					<tr> 
+						<td > <input type = 'text' class = 'network partition-text-input text-input' placeholder = 'Enter Network Name' /> 
+						<div class = 'remover btn-2' onclick = "deletefromConfigTable(this.parentNode.parentNode, 'Network', 'config-map')" > Delete</div>  </td> 
+						<td> 
+							 <div class = 'device-adder btn-2' onclick = "addtoConfigTable(this, 'Device', this)"  name = 'New Device'> New Device </div>
+						</td>
+					</tr>
+					<tr>
+						<td > <div class = 'net-adder btn-2' onclick = "addtoConfigTable(this.parentNode.parentNode, 'Network', this)" name = 'New Network'> New Network </div> </td>
+					<tr>
+				 </table> 
+			</td>
+		</tr>
+	</table>
+<br>
+<br>
+</script>
+<script type = 'network-template' id = 'template3'>
+			<tr> 
+				<td > <input type = 'text' class = 'network text-input' placeholder = 'Enter Network Name' /> 
+					<div class = 'remover btn-2' onclick = "deletefromConfigTable(this.parentNode.parentNode, 'Network', 'config-map')" > Delete</div>  
+				</td> 
+				<td>
+					<div class = 'device-adder btn-2' onclick = "addtoConfigTable(this, 'Device', this)"  name = 'New Device'> New Device </div>
+				</td>
+			</tr>		
+</script>
+<script type = 'device-template' id = 'template4'>
+	<input type = 'text' class = 'device text-input'  placeholder = 'Please enter email address' /> 
+	<div class = 'remover btn-2' onclick = "deletefromConfigTable(this.parentNode, 'Device', 'config-map')" > Delete</div>
+
+</script>
+<script type = 'AdminSideBar-template'  id ="template5"   >
+	<div class="sidebar">					
+		<ul class="nav nav-sidebar">	
+			<li id="nav-option-simCreate" onclick = "simulationListView()">						
+				<a href="#">Simulations
+				</a>						
+			</li>						
+			<li id="nav-option-simView" class='active' onclick = "newSimulationView()">							
+				<a href="#">New Simulation 
+				</a>						
+			</li>							
+		</ul>					
+	</div>				
+</script>
+
+<script type = 'ApplicationView' ID ='template6'>
+		<nav class="navbar navbar-inverse navbar-fixed-top">
+		</nav>
+</script>
+
+<script type= 'AttachToken-Template' id = 'template8'>
+	<div id = 'registersimulation'>
+		<h1 class='flip-up-text'> Register for Simulation</h1>
+	</div>
+	<div class = 'container'>
+		<table class='center-table'>
+			<tr>
+				<td> 
+					<span class = 'text'> A token would have been sent to your email or phone </span>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<input type = 'text' class='text-input' id = 'token' name = 'tokenvalue' placeholder = 'Enter Token Here' />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<input type = 'hidden' style = 'display:none' id = 'simulation_id_div' value = '{{id}}' />
+					<div class = 'btn btn-primary' onclick = 'authenticate()'> Enter Session</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+</script>
+<script type = 'DeviceSideBar' id = 'template9'>
+	<div class="sidebar">					
+		<ul class="nav nav-sidebar">						
+			<li id='my-create-network-link' onclick = "createNetworkView()">						
+				<a href="#">Create Network</a>						
+			</li>						
+			<li id='my-networks-link' onclick = "NetworksListView()">						
+				<a href="#">View Networks</a>
+			</li>
+			<li id='my-logs-link' onclick = "LogsView()">						
+				<a href="#">View My Logs</a>						
+			</li>
+			<li id='my-devices-link' onclick = "DeviceListView()">						
+				<a href="#">View Devices</a>						
+			</li>					
+			<li id='my-apps-link' onclick = "appDefaultView()">
+				<a href='#'> My Apps </a>
+			</li>	
+			<li id='my-account-link' onclick = "AccountView()">						
+				<a href="#">About Me</a>						
+			</li>
+			<li id='my-back-link' onclick = "SimulationManagementView()">				
+				<a href="#">Back</a>
+			</li>	
+		</ul>					
+	</div>		
+</script>
+<script type='createSimulation-template' id = 'template10'>
+<h1 class = 'flip-up-text'> 
+		Create a Simulation
+</h1>
+<div name = 'createpageone' id='createpageone'>
+	<table class='center-table' id = 'propagatelist'>
+		<tr id = 'name'>
+			<td>
+				<span class = 'textfield'> Simulation Name </span>
+			</td>
+			<td>
+				<input type = 'text' class='text-input create-sim-field' id = 'simulation_name' name = 'simulation_name' size = '15' onclick = 'checkField(this)' />
+				<br/>
+			</td>
+		</tr>
+		<tr id = 'numberNetworks'>
+			<td>
+				<span class = 'textfield'> Number of Networks </span>
+			</td>
+			<td>
+				<input type = 'number' class='text-input create-sim-field' id = 'num_networks' name = 'netnumbers' size = '5' oninput = "expandField(this)" />
+				<br/>
+			</td>
+		</tr>
+		<tr id = 'numberDevices'>
+			<td>
+				<span class = 'textfield'> Number of Devices </span>
+			</td>
+			<td>
+				<input type = 'number' class='text-input create-sim-field' id = 'num_devices' name = 'devicenumbers' size = '5' oninput = "expandField(this)" />
+				<br/>
+			</td>
+		</tr>
+		<tr id = 'tokenMethod'>
+			<td>
+				<span class = 'textfield'> Token Propagation Method</span>
+			</td>
+			<td>
+				<select class='text-input create-sim-field' id = 'tokenmethod' name = 'tokenmethod'>
+					<option value='email'> Email </option>
+				</select>
+				<br/>
+			</td>
+		</tr>
+	</table>
+	<div id = 'input-num-error'></div>
+	<h2 id='partition-creation-header'> Partition the networks and devices</h2>
+	<div id ='available-list'>
+		Available Networks: <span id = 'avail-networks'> </div>
+		Available Devices:  <span id = 'avail-devices'> </div>
+	</div>  
+	
+	<div id = 'config-map'>	
+		<div class = 'btn-2' id='button-create-partition' onclick="addtoConfigTable(this, 'Partition', this)"> New Partition </div> 
+	</div>
+	<br><br> 
+	 
+	<div class = 'btn' id='button-create-simulation' onclick = "CreateSimulation()"> Start Simulation </div>
+	</div>
+</script>
+
+<script type = "AccountTemplate" id = "template12" >
+	<h1 class='flip-up-text'>My Information</h1>
+	<div class = 'container'>
+		<div>
+			<h3> Hello {{current_device_name}} </h3>
+		</div> 
+		<div class = 'counters'> 
+			<table class='center-table'>
+				<tr> 
+					<td> 
+					 	<div> Email: {{email}} </div>
+					</td>
+				</tr>
+				<tr> 
+					<td> 
+					 	<div> Registered On: {{registeredOn}} </div>
+					</td>
+				</tr>
+				<tr> 
+					<td>
+						<div> Token: {{token}}  </div>
+					</td> 
+				</tr>
+				<tr> 
+					<td>
+						<div> Current Network: {{current_network}}  </div>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	
+</script>
+
+<script type = "NetworkListTemplate" id = "template13">
+
+	<div class = 'container'>
+		<table class='center-table'>
+			{{#networks}}
+			
+				<tr  id = '{{_id}}'> 
+					<td> {{network_name}}  </td> 
+				</tr>
+			{{/networks}}
+		</table>
+	</div><br>
+		
+</script>
+
+<script type = "DeviceListTemplate" id = "template14">
+	<h1 class='flip-up-text'>Devices in this Simulation</h1>
+	<span >Device Name</span>
+	<span class='table-title'>Network Name</span>
+	<div class = 'network-scroll-table-wrapper'>
+		<div class = 'container network-scroll-table-scroll'>
+			<table class='center-table'>
+				{{#devices}}
+				
+					<tr  id = '{{_id}}'> 
+						<td> {{current_device_name}}  </td> 
+						<td>{{current_network}}</td>
+					</tr>
+				{{/devices}}
+			</table>
+		</div>
+	</div>
+	<br>	
+</script>
+
+
+<script type = "StatesListTemplate" id = "template15">
+	<table class='center-table'>
+		str += "<tr id = '" + states[i].timestamp + "'> <td> <div onclick = 'updateStatesView(&quot;" + states[i].timestamp + "&quot;) '> " +
+				states[i].timestamp + " </td> <td> Revert </td> </tr>"+
+	"</table>"
+</script>
+
+<script type = "AdminDeviceListTemplate" id = "template16">
+	<div class = 'container'>
+		<table class='center-table'>
+			{{#devices}}
+			
+				<tr  id = '{{device}}'> 
+					<td>   {{device}} <div class = 'btn btn-primary' onclick = 'deleteDevice(&quot;{{device}}&quot;)' > Delete Device </div>   </td> 
+				</tr>
+			{{/devices}}
+		</table>
+	</div><br>
+		
+</script>
+
+<script type = "SimulationLogTemplate" id = "template17">
+	<h1 class='flip-up-text'>My Event Logs</h1>
+	<div id='logs-scroll-box'>
+		<table class='center-table text-left'>
+		 	{{#logs}}<tr> <td> {{.}} </td> </tr>{{/logs}}
+		</table>
+	</div>
+</script>
+<script type = "In Simulation Sidebar" id = "template18">	
+	<div class="sidebar">				
+		<ul class="nav nav-sidebar">						
+			<li id='nav-option-viewTopology' onclick = "networkTopologyView()">						
+				<a href="#"> Network Topology</a>						
+			</li>						
+			<li id='nav-option-history' onclick = "getSimulationHistory('{{simulation_id}}')">						
+				<a href="#">Simulation History</a>						
+			</li>
+			<li id='nav-option-applications' onclick = "adminAppsView()">						
+				<a href="#">Applications</a>						
+			</li>			
+			<li id='nav-option-RDTs' onclick = "RDTsView()">						
+				<a href="#">RDTs</a>						
+			</li>	
+			<li id='nav-option-tests' onclick = "TestsView()">
+				<a href = '#' > Test Scripts</a>
+			</li>				
+			<li id='nav-option-applications' onclick = "deviceDefaultView()">						
+				<a href="#">My Device</a>						
+			</li>
+			<li id='nav-option-backtosimulations' onclick = "simulationListView()">						
+				<a href="#">Back</a>						
+			</li>	
+		</ul>					
+	</div>		
+</script>
+<script type = "AdminAppsListTemplate" id = "template19">
+	<h1 class='flip-up-text'>Applications</h1>
+	<h4> The Apps currently available in this simulation </h4>
+	<br>
+	{{#apps}}
+	<table class='center-table'>
+	 	<tr>
+			 <td> 
+				{{name}} 
+			</td> 
+			<td>
+				<div class = 'btn btn-primary' onclick = "ViewAppSpec('{{_id}}', this)">View Specification</div>
+			</td>
+		</tr>
+		{{#device_list}}
+		
+		<tr>
+			<td> 
+				{{name}} 
+			</td>
+			<td> 
+				{{#deployed}}
+				
+				<div class = 'btn btn-primary' onclick = "reverseDeployApp('{{_id}}','{{device_token}}')"> Reverse Deployment </div>
+				{{/deployed}}
+				
+				{{^deployed}}
+					<div class = 'btn btn-primary' onclick = "DeployApp('{{_id}}', '{{device_token}}')"> Deploy App </div>
+				{{/deployed}}
+				
+			</td> 
+			<td id = '{{_id}}' > </td>
+		</tr>
+		{{/device_list}}
+ 	</table>
+ 	<br>
+ 	{{/apps}}
+	<br>
+	<br>
+	<div id="uploadFiles"class='content' onload="handleFiles();">
+		<div class = 'btn btn-primary'  onclick = "toggle_visibility('Requirements', this)" > Toggle Requirements </div>
+		<div id = 'Requirements' style = "display:none">
+			<br>
+			<table class = "require-table">
+				<thead>
+				  <tr>
+				     <th> Requirements</th>
+				     <th>Example</th>
+				  </tr>
+				 </thead>
+				 <tbody class="text-left">
+				 	<tr>
+				 		<td>
+				 			<p class="text-indent">
+					 			The Application must include a package.json file. The package.json file describes your application and the RDTs which it uses. The "name" field specifies the name of your application. The "version" allows you to identify your application by a version. The "description" is a description of your application. "main" specifies the html file which will be loaded when running the application. "rdt_list" is a list of RDTs that your application makes use of. More files may be included as well, including CSS files.
+					 		</p> 
+				 		</td>
+				 		<td class='width-45ps'>
+					 		<code> 
+								{<br>
+					  			 	"name": "CounterApp", <br>
+					 				"version": "0.1.0",<br>
+					  			 	"description": "A small counter app for testing a incrementing data type",<br>
+					  				"main": "index.html",<br>
+									"rdt_list" : [ "incRDT" ]<br> 
+								}
+							</code>
+						</td>
+				 	</tr>
+				 	
+				 	<tr>
+				 		<td>
+				 			<p class="text-indent">
+				 				The application must include the following script tag at the beginning of the included HTML file in order to work with our framework. This is a javascript file used to tie your logic in with the RDTs.
+				 			</p>
+				 		</td>
+				 		<td>							
+							<code class='width-45ps'>  src = "../ApplicationRequirements.js"  </code>
+				 		</td>
+				 	</tr>
+				 	
+				 	<tr>
+				 		<td>
+				 			<p class='text-indent'>
+
+								In order to manipulate an RDT within your application, use the call manipulateRDT({rdt-name}, {function}, {callback-handler}). Here, the {rdt-name} is the name of the rdt to be manipulated, the {function} is the function to be performed on that rdt, and {callback-handler} is your callback function to handle the new value returned from that RDT when this function has been executed.
+				 			</p>
+				 		</td>
+				 		<td>
+				 			<code class='width-45ps'> manipulateRDT('Counter', 'inc', newIncVal ); </code>
+				 		</td>
+				 	</tr>
+				 </tbody>
+			</table>
+			
+		</div>
+		<div id="appDiv" class="uploadContainer">
+
+			<div id="Files" class ="fileContainer"></div>
+			<a href="#" class='btn upload-file-cover' onclick="document.getElementById('uploadApp').click(); return false;" />Browse</a>
+			<input id="uploadApp" type="file" onchange="handleFiles('uploadApp');" multiple> selected files: 
+			<span id="fileNum">0</span>; total size: <span id="fileSize">0</span>
+
+		</div>
+		<button id = "UploadButton" class="btn uploadButton" name="Send file" onclick="pushFileEvent('App')">Upload</button>
+	</div>
+</script>
+
+
+<script type = "RDTsListTemplate" id="template20">
+	<h1 class='flip-up-text'>Replicated Data Types </h1>
+	<h4> The RDTs currently available in our framework </h4>
+	
+	<table class='center-table'>
+	 	{{#rdts}}<tr>
+			 <td> 
+				{{name}} 
+			</td> 
+			<td> 
+				<div class = 'btn btn-primary' onclick = "ViewRDTSpec('{{_id}}', this)">View Specification</div>
+			</td> 
+			<td id = '{{_id}}'> </td>
+		</tr>{{/rdts}}
+ 	</table>
+	<br>
+	<br>
+	<div id="uploadFiles"class='content' onload="handleFiles();">
+		<div class = 'btn btn-primary'  onclick = "toggle_visibility('Requirements', this)" > Toggle Requirements </div>
+		<div id = 'Requirements' style = "display:none">
+			<br>
+			<table class = "require-table">
+				<thead>
+				  <tr>
+				     <th> Requirement</th>
+				     <th>Example</th>
+				  </tr>
+				 </thead>
+				 <tbody class='text-left'>
+				 	<tr>
+				 		<td> 
+				 			<p class='text-indent'>
+				 				The RDT must include a package.json file. This file describes the RDT and how to interact with it. The "name" field is the name of the RDT. The "version" field is allows you to attach a version number to your RDT in the case that you would like to create multiple versions. The "description" is a description of your RDT and its functionality. The "main" field is the name of the javascript file which includes every file required for the RDT as well as exporting an init function, allowing it to be propagated to all devices. Please view the example RDTs for more information.
+				 			</p>
+						</td>
+						<td class='width-45ps'>
+							<code> 
+								{
+					  			 	"name": "incRDT",
+					 			 	"version": "0.1.0",
+					  			 	"description": "A replicated integer counter data type",
+					  			 	"main": "rdtInterface.js"
+								}
+							</code>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<p class='text-indent'>
+								The spec.md described the behavior of your RDT, equivalent to a "readme" file, allowing developers to understand how your RDT works and how to utilize it in their applications.
+							</p>
+						</td>
+						<td class='width-45ps'>
+							<code>
+								# incRDT: A simple replicated integer counter data type<br>
+								
+								This supplies a Counter object has with two public methods:<br><br>
+					
+					    		var c = new Counter();<br>
+					    		c.inc();    // increment the counter <br>
+					   			 c.val();    // read the counter value <br><br>
+					
+					
+								The Counter object will be created for you and automatically replicated at each
+								device object from the `deviceIterator` you passed in to the modules `init`
+								method. There is no need to create Counter objects by yourself. In fact, the
+								Counter constructor function is not even exported. <br>
+								
+								You should use the device objects `accessRDT` method to grab the copy of a
+								Counter that is created for you. Read the `network_topology.js` file and check
+								the interface of `Device`.
+							</code>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<br>
+		<div id="appDiv" class="uploadContainer">
+			<div id="Files" class ="fileContainer"></div>
+			<a href="#" class='btn upload-file-cover' onclick="document.getElementById('uploadRDT').click(); return false;" />Browse</a>
+			<input id="uploadRDT" type="file" onchange="handleFiles('uploadRDT');" multiple> selected files: 
+			<span id="fileNum">0</span>; total size: <span id="fileSize">0</span>
+		</div>	
+	
+		<button id = "UploadButton" class="btn uploadButton" name="Send file" onclick="pushFileEvent('RDT')">Upload</button>
+	</div>
+
+</script>
+
+
+
+<script type="topologyViewTemplate" id="template21">
+	<div id='bigDiv'>
+		<h1 class='flip-up-text'>Network Topology</h1>
+		<svg></svg>
+	</div>
+	<script type='text/javascript'>
+		
+	</script>
+</script>
+
+<script type="eventLogViewTemplate" id="template24">
+	<h1 id ='page-title' class='flip-up-text'>Event Logs View</h1>
+	<svg>
+	</svg>
+	<select size = '10' id ='log-dates' onchange='selectSimulationDate(this.value)'>
+	</select>
+	<br>
+	<div class='sim-log-cell'>
+		<h4 id='simulation-log-title'>Simulation logs</h4>
+		<select size = '10' id ='simulation-log'>
+		</select>
+	</div>
+	<div class='sim-log-cell'>
+		<h4 id='deviceLog-title'>Click a Device to  view logs</h4>
+		<select size = '10' id ='device-log'>
+		</select>
+	</div>
+</script>
+
+<script type = "DeviceAppsListTemplate" id = "template22">
+	<h1 class='flip-up-text'>Available Applications</h1>
+	<br>
+	<table class='center-table'>
+	 	{{#apps}}<tr
+>			 <td> 
+				{{name}} 
+			</td> 
+			<td> 
+				<div class = 'btn btn-primary' onclick = "LaunchApp('{{_id}}')"> Launch </div>
+			</td> 
+		</tr>{{/apps}}
+ 	</table>
+	<br>
+</script>
+
+<script type = "TestsListTemplate" id="template23">
+	<h1 class='flip-up-text'>Automated Test Scripts</h1>
+	<h4> The test scripts can be deployed into the simulation </h4>
+	
+	<!-- <table class='center-table'>
+	 	{{#tests}}<tr>
+			 <td> 
+				{{name}} 
+			</td> 
+			<td> 
+				<div class = 'btn btn-primary' onclick = "ViewTestSpec('{{_id}}', this)">View Specification</div>
+			</td>
+			<td> 
+				<div class = 'btn btn-primary' onclick = "RunTest('{{_id}}', this)">Run Test</div>
+			</td> 
+			<td id = '{{_id}}'> </td>
+		</tr>{{/tests}}
+ 	</table>
+ 	-->
+	<br>
+	<br>
+	<div id="uploadFiles"class='content' onload="handleFiles();">
+		<div class = 'btn btn-primary'  onclick = "toggle_visibility('Requirements', this)" > Toggle Requirements </div>
+		<div id = 'Requirements' style = "display:none">
+			<h4> Requirements </h4>
+			<p> Your Test script must be in the format of a JSON file. <br>
+			The json file must describe the test, the RDTs which the test uses, and the general parameters for your test environment.<br>
+			<p class='text-left margin-20px'>
+				<p class ='tab'> An example is: </p>
+				<div class='text-left margin-left-15ps'>
+					<code> 
+						{<br>
+			  			 	<p class='tab'>"name": "firstTest",</p>
+			 			 	<p class='tab'>"version": "0.1.0",</p>
+			  			 	<p class='tab'>"description": "The first automatic test script for our framework",</p>
+			  			 	<p class='tab'>"parameters": {</p>
+			  			 		<p class='double-tab'>"rdts" : [{"name": "Counter", "method" : "inc"} , {"name" : "MyCounter", "method" : "dec"}], </p>
+			  			 		<p class='double-tab'>"device_mobility" : "high",</p>
+			  			 		<p class='double-tab'>"operations" : 25</p>
+			  			 	<p class='tab'>}</p>
+						}
+					</code>
+				</div>
+			</p>
+			<br> <br>
+			For the fields of your script. the name, version, description and parameters must be filled in. 
+			Failure to put correct information in these fields will result in our framework rejecting your script. 
+			The "name" field is the name of your script. The "version" field allows you to have different versions of your script. 
+			The "description" field is a description of the test script. "parametes" are explained below. <br>
+			<br>
+			<h3>For the parameter field the following paramters are acceptable</h3>
+			<br>
+			<table class='width-80ps center-table'>
+				<thead>
+				  <tr>
+				     <th> Parameter Name</th>
+				     <th>Description</th>
+				     <th>Example of Values</th>
+				  </tr>
+				 </thead>
+				<tr>
+					<td> rdts </td> 
+					<td> The list of rdts you want your test to use. </td> 
+					<td class='width-45ps'> Example 1: 
+						<code> [{"name": "incRDT", "method" : "inc"} , {"name" : "decRDT", "method" : "dec"}] </code>
+						<br>
+						Example 2: 
+						<code>[ {"name" : "decRDT", "method" : "dec"}] </code>
+						<br>
+						 Example 3: 
+						<code> [{"name": "incRDT", "method" : "inc"} ] </code>
+						<br>
+					</td>
+				</tr>
+				<tr>
+					<td> device_mobility </td> 
+					<td> The frequency of the device movement within the simulation. </td> 
+					<td> High <br> Medium <br> Low </td>
+				</tr>
+				<tr>
+					<td> operations </td> 
+					<td> The number of operations that the devices should perform on the specified RDT(s). </td> 
+					<td> 12 <br> 100 <br> 30 </td>
+				</tr>
+				
+			</table>
+			</p>
+		</div>
+			<br>
+			<div id="testDiv" class="uploadContainer">
+				<div id="Files" class ="fileContainer"></div>
+				<a href="#" class='btn upload-file-cover' onclick="document.getElementById('uploadTest').click(); return false;" />Browse</a>
+				<input id="uploadTest" type="file" onchange="handleFiles('uploadTest');" multiple> selected files: 
+				<span id="fileNum">0</span>; total size: <span id="fileSize">0</span>
+			</div>	
+		
+			<button id = "UploadButton" class="btn uploadButton" name="Send file" onclick="pushFileEvent('Test')">Upload and Run</button>
+	</div>
+</script>
+
+
+<body>	
+		<div id = 'app'>			
+			<header> 
+			</header>			
+
+			<div class="row">
+				<div class="sidebar"> <aside>
+			</aside></div>			
+				
+				<div class="main" > 
+				<br>
+				<section> 
+				</section>
+				<div id = "content"> Loading... </div>
+				
+				</div>  
+				
+			</div>				
+		</div>	 	 	
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "NetworkSIM",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node Server.js"
+  },
+  "dependencies": {
+    "express": "*",
+    "hjs": "*",
+    "body-parser": "*",
+    "xmlhttprequest": "*",
+    "mongodb": "*",
+    "mongoose": "*",
+    "express-logger": "*",
+    "nodemailer": "*",
+    "mkdirp": "*",
+    "socket.io": {
+        "transports": ["polling","websocket"]
+    } 
+  }
+}
